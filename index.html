@@ -4,69 +4,116 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#2f6f4f">
+<meta name="theme-color" content="#F7F7F7">
 <title>Daily English</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+  /* Tokens from the "E Learning | Free Language Learning Mobile App UI Kit" Figma community file. */
   :root {
-    --bg: #f7f6f2; --card: #ffffff; --text: #1d1d1b; --muted: #6b6b66;
-    --accent: #2f6f4f; --accent-text: #ffffff; --ok: #1f7a3a; --bad: #b3261e; --line: #deddd6;
+    --bg: #F7F7F7; --card: #E6EFF2; --surface: #FFFFFF; --primary: #D0E3FF; --on-primary: #1E1E1E;
+    --text: #1E1E1E; --muted: #9A9A9A; --ok: #1F7A3A; --bad: #C62828; --line: #E3E3E3;
+    --radius-card: 20px; --radius-pill: 33px;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #161614; --card: #22221f; --text: #ecebe6; --muted: #a3a29b;
-      --accent: #6fbf8f; --accent-text: #10241a; --ok: #7fd197; --bad: #ff8a80; --line: #3a3a35;
+      --bg: #121416; --card: #1E282C; --surface: #262B2F; --primary: #35507A; --on-primary: #EEF4FF;
+      --text: #EDEDED; --muted: #9AA0A6; --ok: #7FD197; --bad: #FF8A80; --line: #33393E;
     }
   }
   * { box-sizing: border-box; }
   body {
     margin: 0; background: var(--bg); color: var(--text);
-    font: 18px/1.5 system-ui, -apple-system, sans-serif;
-    padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+    font: 16px/1.5 Poppins, system-ui, sans-serif;
+    padding: max(20px, env(safe-area-inset-top)) 20px calc(110px + env(safe-area-inset-bottom));
   }
-  main { max-width: 560px; margin: 0 auto; }
+  main { max-width: 480px; margin: 0 auto; }
   section[hidden] { display: none; }
-  h1 { font-size: 1.6rem; margin: 0 0 4px; }
-  h2 { font-size: 1.3rem; margin: 0 0 12px; }
-  .muted { color: var(--muted); font-size: 0.9rem; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin: 12px 0; }
-  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  h1 { font-size: 34px; font-weight: 400; line-height: 1.2; margin: 8px 0 16px; }
+  h2 { font-size: 24px; font-weight: 500; margin: 0; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .card { background: var(--card); border-radius: var(--radius-card); padding: 16px; margin: 14px 0; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+
   button {
-    font: inherit; border: 1px solid var(--line); background: var(--card); color: var(--text);
-    border-radius: 12px; padding: 12px 18px; min-height: 48px; cursor: pointer;
+    font: 500 15px Poppins, system-ui, sans-serif; color: var(--text);
+    border: none; background: var(--surface); border-radius: var(--radius-pill);
+    padding: 12px 20px; min-height: 46px; cursor: pointer;
   }
-  button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
-  button.big { width: 100%; font-size: 1.1rem; }
-  button:disabled { opacity: 0.5; cursor: default; }
-  button.chosen { outline: 2px solid var(--accent); }
-  button.right { border-color: var(--ok); color: var(--ok); }
-  button.wrong { border-color: var(--bad); color: var(--bad); }
-  input, select { font: inherit; width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--text); }
-  label { display: block; margin: 14px 0 4px; font-weight: 600; }
-  .streak { font-size: 2.4rem; font-weight: 700; color: var(--accent); }
-  .sentence { display: block; width: 100%; text-align: left; border: none; border-bottom: 1px solid var(--line); border-radius: 0; padding: 10px 4px; min-height: 0; }
-  .target { font-size: 1.25rem; font-weight: 600; margin: 8px 0 12px; }
+  button.primary { background: var(--primary); color: var(--on-primary); }
+  button.big { width: 100%; min-height: 56px; font-size: 17px; }
+  button.icon { width: 52px; height: 52px; padding: 0; display: grid; place-items: center; font-size: 20px; }
+  button:disabled { opacity: 0.45; cursor: default; }
+  button.chosen { outline: 2px solid var(--text); }
+  button.right { background: #DDF3E4; color: var(--ok); }
+  button.wrong { background: #FBE0DE; color: var(--bad); }
+  @media (prefers-color-scheme: dark) {
+    button.right { background: #1E3A28; }
+    button.wrong { background: #3F2220; }
+  }
+  .chip { display: inline-block; font: 500 12px Inter, system-ui, sans-serif; background: var(--surface); border-radius: var(--radius-pill); padding: 8px 14px; }
+  .chip.active { background: var(--primary); color: var(--on-primary); }
+
+  input, select {
+    font: 15px Poppins, system-ui, sans-serif; width: 100%; padding: 14px 18px; border: none;
+    border-radius: var(--radius-pill); background: var(--surface); color: var(--text);
+  }
+  label { display: block; margin: 16px 0 6px 6px; font-weight: 500; }
+
+  .greet { font-size: 13px; }
+  .name { font-size: 18px; font-weight: 500; }
+  .hero-title { font-size: 22px; line-height: 1.3; margin: 10px 0 4px; }
+  .streak { font-size: 40px; font-weight: 600; line-height: 1; }
+  .sentence { display: block; width: 100%; text-align: left; background: transparent; border-radius: 12px; padding: 10px 8px; min-height: 0; font-weight: 400; font-size: 16px; }
+  .sentence:active { background: var(--surface); }
+  .target { font-size: 20px; font-weight: 500; margin: 6px 0 14px; }
   .ok { color: var(--ok); }
   .missed { color: var(--bad); text-decoration: underline wavy; }
-  .status { min-height: 1.5em; color: var(--muted); }
+  .status { min-height: 1.5em; color: var(--muted); font-size: 14px; margin: 8px 4px; }
   .status.error { color: var(--bad); }
-  .score { font-size: 1.6rem; font-weight: 700; }
-  .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .msg { padding: 10px 14px; border-radius: 14px; margin: 8px 0; max-width: 85%; }
-  .msg.assistant { background: var(--card); border: 1px solid var(--line); }
-  .msg.user { background: var(--accent); color: var(--accent-text); margin-left: auto; }
-  .fix { border-left: 4px solid var(--bad); background: var(--card); padding: 8px 12px; margin: 4px 0 12px; border-radius: 8px; font-size: 0.95rem; }
+  .score { font-size: 32px; font-weight: 600; }
+
+  .msg { padding: 12px 16px; border-radius: var(--radius-card); margin: 8px 0; max-width: 85%; }
+  .msg.assistant { background: var(--card); }
+  .msg.user { background: var(--primary); color: var(--on-primary); margin-left: auto; }
+  .fix { background: var(--surface); border-left: 4px solid var(--bad); padding: 10px 14px; margin: 4px 0 12px; border-radius: 12px; font-size: 14px; }
   .fix s { color: var(--bad); }
-  .fix strong { color: var(--ok); }
+  .fix strong { color: var(--ok); font-weight: 600; }
+
+  nav {
+    position: fixed; left: 50%; transform: translateX(-50%);
+    bottom: max(16px, env(safe-area-inset-bottom)); width: min(440px, calc(100% - 32px));
+    display: flex; justify-content: space-between; align-items: center;
+    background: color-mix(in srgb, var(--surface) 85%, transparent);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-radius: var(--radius-pill); padding: 8px; box-shadow: 0 6px 24px rgb(0 0 0 / 0.08);
+  }
+  nav[hidden] { display: none; }
+  nav button { background: transparent; display: flex; align-items: center; gap: 8px; padding: 10px 14px; min-height: 48px; }
+  nav button span { display: none; }
+  nav button.active { background: var(--primary); color: var(--on-primary); }
+  nav button.active span { display: inline; }
+  nav svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 </style>
 </head>
 <body>
 <main>
   <section id="home">
-    <div class="top"><h1>Daily English</h1><button id="open-settings" aria-label="Settings">⚙︎</button></div>
+    <div class="top">
+      <div><div class="greet">Welcome back,</div><div class="name">Time to practise 👋</div></div>
+      <button class="icon" id="open-settings" aria-label="Settings">⚙︎</button>
+    </div>
+    <h1>Today's lesson</h1>
     <div class="card">
-      <div class="muted">Day streak</div>
-      <div class="streak" id="streak">0</div>
-      <div class="muted">Today's topic: <strong id="topic"></strong></div>
+      <div class="row"><span class="chip">Listen</span><span class="chip">Shadow</span><span class="chip">Talk</span></div>
+      <div class="hero-title" id="topic"></div>
+      <div class="muted">About 15 minutes</div>
+    </div>
+    <div class="card row" style="justify-content: space-between">
+      <div><div class="muted">Day streak</div><div class="streak" id="streak">0</div></div>
+      <div style="font-size: 36px">🔥</div>
     </div>
     <button class="primary big" id="start">Start today's practice</button>
     <p class="status" id="home-status" role="status"></p>
@@ -92,7 +139,7 @@
   </section>
 
   <section id="listen" hidden>
-    <div class="top"><h2 id="lesson-title"></h2><button data-go="home">✕</button></div>
+    <div class="top"><h2 id="lesson-title"></h2></div>
     <div class="row">
       <button class="primary" id="play-story">▶ Play story</button>
       <button id="rate-toggle"></button>
@@ -104,7 +151,7 @@
   </section>
 
   <section id="shadow" hidden>
-    <div class="top"><h2>Shadowing <span class="muted" id="shadow-pos"></span></h2><button data-go="home">✕</button></div>
+    <div class="top"><h2>Shadowing</h2><span class="chip active" id="shadow-pos"></span></div>
     <div class="card">
       <div class="target" id="shadow-target"></div>
       <div class="row">
@@ -115,33 +162,40 @@
       </div>
       <div id="shadow-type" hidden>
         <label for="shadow-input">Type what you said</label>
-        <div class="row"><input id="shadow-input" autocomplete="off"><button id="shadow-check">Check</button></div>
+        <div class="row"><input id="shadow-input" autocomplete="off" style="flex: 1"><button class="primary" id="shadow-check">Check</button></div>
       </div>
       <p class="status" id="shadow-status" role="status"></p>
       <div class="score" id="shadow-score"></div>
       <div id="shadow-result"></div>
     </div>
-    <div class="row">
+    <div class="row" style="justify-content: space-between">
       <button id="shadow-prev">← Back</button>
       <button class="primary" id="shadow-next">Next →</button>
     </div>
   </section>
 
   <section id="talk" hidden>
-    <div class="top"><h2>Talk <span class="muted" id="talk-timer">5:00</span></h2><button id="talk-finish">Finish →</button></div>
+    <div class="top"><h2>Talk <span class="chip active" id="talk-timer">5:00</span></h2><button id="talk-finish">Finish →</button></div>
     <div id="chat"></div>
     <p class="status" id="talk-status" role="status"></p>
     <button class="primary big" id="talk-speak">🎤 Tap to speak</button>
-    <div class="row" style="margin-top: 8px">
+    <div class="row" style="margin-top: 10px">
       <input id="talk-input" autocomplete="off" placeholder="…or type your answer" style="flex: 1">
-      <button id="talk-send">Send</button>
+      <button class="primary" id="talk-send">Send</button>
     </div>
   </section>
 
   <section id="review" hidden>
-    <div class="top"><h2>Review</h2><button data-go="home">✕</button></div>
+    <div class="top"><h2>Review</h2></div>
   </section>
 </main>
+
+<nav id="nav" aria-label="Lesson steps">
+  <button data-step="home" aria-label="Home"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></button>
+  <button data-step="listen" aria-label="Listen"><svg viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg><span>Listen</span></button>
+  <button data-step="shadow" aria-label="Shadow"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Shadow</span></button>
+  <button data-step="talk" aria-label="Talk"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg><span>Talk</span></button>
+</nav>
 <script type="module" src="app.js"></script>
 </body>
 </html>

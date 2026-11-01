@@ -12,6 +12,8 @@ let lesson = null;
 
 export function show(screenId) {
   for (const s of document.querySelectorAll("main > section")) s.hidden = s.id !== screenId;
+  for (const b of document.querySelectorAll("nav [data-step]")) b.classList.toggle("active", b.dataset.step === screenId);
+  $("nav").hidden = screenId === "settings";
   window.scrollTo(0, 0);
 }
 
@@ -46,22 +48,44 @@ function renderHome() {
   const streak = store.get("streak", null);
   const yesterday = localDate(new Date(Date.now() - 86400000));
   $("streak").textContent = streak && [today, yesterday].includes(streak.lastDate) ? streak.count : 0;
-  $("topic").textContent = store.get(`lesson:${today}`, null)?.topic ?? topicFor(today);
+  const t = store.get(`lesson:${today}`, null)?.topic ?? topicFor(today);
+  $("topic").textContent = t[0].toUpperCase() + t.slice(1);
 }
 
 let topic = topicFor(today);
 
 $("start").onclick = async () => {
+  if (await loadLesson()) show("listen");
+};
+
+// Bottom nav: steps need today's lesson, so load it first if needed.
+for (const b of document.querySelectorAll("nav [data-step]")) {
+  b.onclick = async () => {
+    const step = b.dataset.step;
+    if (step === "home") { renderHome(); return show("home"); }
+    if (!lesson && !(await loadLesson())) return;
+    if (step === "shadow") renderShadow();
+    if (step === "talk") return enterTalk();
+    show(step);
+  };
+}
+
+// Returns true once `lesson` is set (and the Listen screen rendered); otherwise shows why on Home or Settings.
+async function loadLesson() {
   status("home-status", "");
   if (!store.get("apiKey", "")) {
     openSettings("Add your Claude API key to start.");
-    return;
+    return false;
   }
   lesson = store.get(`lesson:${today}`, null);
   if (!lesson && !navigator.onLine) {
     const last = store.get("lastLessonDate", null);
     lesson = last && store.get(`lesson:${last}`, null);
-    if (!lesson) return status("home-status", "You're offline and there's no saved lesson yet.", true);
+    if (!lesson) {
+      show("home");
+      status("home-status", "You're offline and there's no saved lesson yet.", true);
+      return false;
+    }
     status("home-status", "Offline: replaying your last lesson.");
   }
   if (!lesson) {
@@ -74,18 +98,22 @@ $("start").onclick = async () => {
       store.set("lastLessonDate", today);
       status("home-status", "");
     } catch (e) {
-      if (e instanceof TutorError && e.kind === "auth") return openSettings(errorText(e));
+      if (e instanceof TutorError && e.kind === "auth") {
+        openSettings(errorText(e));
+        return false;
+      }
       if (e instanceof TutorError && e.kind === "refusal") topic = TOPICS[(TOPICS.indexOf(topic) + 1) % TOPICS.length];
+      show("home");
       status("home-status", errorText(e), true);
       $("start").textContent = "Try again";
-      return;
+      return false;
     } finally {
       $("start").disabled = false;
     }
   }
   renderListen();
-  show("listen");
-};
+  return true;
+}
 
 // ---------- Settings ----------
 
@@ -373,3 +401,4 @@ $("talk-input").onkeydown = e => { if (e.key === "Enter") $("talk-send").click()
 $("talk-finish").onclick = () => (talkBusy ? (finishWhenIdle = true) : finishTalk());
 
 renderHome();
+show("home");
