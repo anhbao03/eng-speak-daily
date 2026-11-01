@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#F7F7F7">
+<meta name="apple-mobile-web-app-title" content="English">
 <title>Daily English</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
@@ -32,6 +36,7 @@
   section[hidden] { display: none; }
   h1 { font-size: 34px; font-weight: 400; line-height: 1.2; margin: 8px 0 16px; }
   h2 { font-size: 24px; font-weight: 500; margin: 0; }
+  h3 { font-size: 17px; font-weight: 500; margin: 22px 0 8px; }
   .muted { color: var(--muted); font-size: 13px; }
   .card { background: var(--card); border-radius: var(--radius-card); padding: 16px; margin: 14px 0; }
   .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
@@ -186,7 +191,16 @@
   </section>
 
   <section id="review" hidden>
-    <div class="top"><h2>Review</h2></div>
+    <div class="top"><h2>Well done!</h2></div>
+    <div class="card row" style="justify-content: space-between">
+      <div><div class="muted">Day streak</div><div class="streak" id="review-streak">0</div></div>
+      <div style="font-size: 36px">🔥</div>
+    </div>
+    <h3>Today's corrections</h3>
+    <div id="review-fixes"></div>
+    <h3>Practise these again</h3>
+    <div id="review-shadow"></div>
+    <button class="primary big" data-go="home">Back to Home</button>
   </section>
 </main>
 

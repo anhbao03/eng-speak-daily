@@ -1,5 +1,5 @@
 import { score } from "./score.js";
-import { createStore, localDate, addMistakes } from "./store.js";
+import { createStore, localDate, addMistakes, updateStreak } from "./store.js";
 import { speak, listen, canListen, recordClip, englishVoices, voiceStudioUrlError } from "./speech.js";
 import { makeLesson, chatTurn, topicFor, TOPICS, TutorError } from "./tutor.js";
 
@@ -39,6 +39,7 @@ const errorText = e => {
 
 document.addEventListener("click", e => {
   const go = e.target.closest("[data-go]");
+  if (go?.dataset.go === "home") renderHome();
   if (go) show(go.dataset.go);
 });
 
@@ -372,7 +373,30 @@ async function enterTalk() {
 function finishTalk() {
   clearInterval(talkTimer);
   finishWhenIdle = false;
+  renderReview();
   show("review");
+}
+
+// ---------- Review ----------
+
+// Reaching Review counts as a completed session.
+function renderReview() {
+  const streak = updateStreak(store.get("streak", null), today);
+  store.set("streak", streak);
+  $("review-streak").textContent = streak.count;
+
+  const fixes = store.get("mistakes", []).filter(m => m.date === today);
+  $("review-fixes").replaceChildren(...(fixes.length
+    ? fixes.map(c => el("div", { className: "fix" }, el("s", { textContent: c.wrong }), " → ", el("strong", { textContent: c.right }), el("div", { className: "muted", textContent: c.why })))
+    : [el("p", { className: "muted", textContent: "No corrections today. Nice!" })]));
+
+  const scores = store.get("shadowScores", {})[today] ?? [];
+  const weak = lesson.shadow.map((s, i) => ({ s, best: scores[i] ?? 0 })).filter(x => x.best < 80);
+  $("review-shadow").replaceChildren(...(weak.length
+    ? weak.map(({ s, best }) => el("div", { className: "card row", style: "justify-content: space-between; flex-wrap: nowrap" },
+        el("div", {}, el("div", { textContent: s }), el("span", { className: "chip", textContent: `Best ${best}%` })),
+        el("button", { className: "icon", textContent: "▶", ariaLabel: "Play", onclick: () => say(s) })))
+    : [el("p", { className: "muted", textContent: "All sentences 80% or better!" })]));
 }
 
 $("talk-speak").onclick = async () => {
@@ -402,3 +426,5 @@ $("talk-finish").onclick = () => (talkBusy ? (finishWhenIdle = true) : finishTal
 
 renderHome();
 show("home");
+
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
