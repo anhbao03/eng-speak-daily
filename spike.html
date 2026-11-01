@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Speech spike</title>
+<style>
+  body { font: 18px system-ui, sans-serif; margin: 16px; max-width: 600px; }
+  textarea { width: 100%; font: inherit; box-sizing: border-box; }
+  button { font: inherit; padding: 12px 20px; margin: 8px 8px 8px 0; }
+  pre { white-space: pre-wrap; background: #f2f2f2; padding: 8px; font-size: 14px; }
+</style>
+</head>
+<body>
+<h1>Speech spike</h1>
+<textarea id="text" rows="3">Hello, how are you today?</textarea>
+<button id="speak">Speak</button>
+<button id="listen">Listen</button>
+<pre id="log"></pre>
+<script>
+  // Throwaway: answers "does browser speech work on this device?" (plan Task 1).
+  const log = (...a) => { document.getElementById("log").textContent += a.join(" ") + "\n"; };
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  log("userAgent:", navigator.userAgent);
+  log("speechSynthesis:", "speechSynthesis" in window);
+  log("SpeechRecognition:", !!SR);
+  log("MediaRecorder:", "MediaRecorder" in window);
+  log("standalone:", navigator.standalone === true || matchMedia("(display-mode: standalone)").matches);
+
+  function listVoices() {
+    const en = speechSynthesis.getVoices().filter(v => v.lang.startsWith("en"));
+    if (en.length) log("en voices:", en.map(v => `${v.name} (${v.lang}${v.localService ? "" : ", online"})`).join("; "));
+    return en.length;
+  }
+  if ("speechSynthesis" in window && !listVoices()) speechSynthesis.onvoiceschanged = listVoices;
+
+  document.getElementById("speak").onclick = () => {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(document.getElementById("text").value);
+    u.lang = "en-US";
+    u.onend = () => log("speak: done");
+    u.onerror = e => log("speak error:", e.error);
+    speechSynthesis.speak(u);
+  };
+
+  document.getElementById("listen").onclick = () => {
+    if (!SR) return log("listen: not supported");
+    const r = new SR();
+    r.lang = "en-US";
+    r.interimResults = false;
+    r.onstart = () => log("listen: started, speak now");
+    r.onresult = e => log("heard:", e.results[0][0].transcript, `(confidence ${e.results[0][0].confidence.toFixed(2)})`);
+    r.onerror = e => log("listen error:", e.error);
+    r.onend = () => log("listen: ended");
+    r.start();
+  };
+</script>
+</body>
+</html>
