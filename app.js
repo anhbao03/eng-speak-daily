@@ -1,7 +1,7 @@
 import { score } from "./score.js";
-import { createStore, localDate } from "./store.js";
+import { createStore, localDate, addMistakes } from "./store.js";
 import { speak, listen, canListen, recordClip, englishVoices, voiceStudioUrlError } from "./speech.js";
-import { makeLesson, topicFor, TOPICS, TutorError } from "./tutor.js";
+import { makeLesson, chatTurn, topicFor, TOPICS, TutorError } from "./tutor.js";
 
 const store = createStore();
 const today = localDate();
@@ -259,11 +259,117 @@ $("shadow-check").onclick = () => {
 $("shadow-prev").onclick = () => { shadowIndex--; myClip = null; renderShadow(); };
 $("shadow-next").onclick = () => {
   myClip = null;
-  if (shadowIndex === lesson.shadow.length - 1) return show("talk");
+  if (shadowIndex === lesson.shadow.length - 1) return enterTalk();
   shadowIndex++;
   renderShadow();
 };
 
 document.querySelector('[data-go="shadow"]').addEventListener("click", renderShadow);
+
+// ---------- Talk ----------
+
+const OPENER = "(start the conversation with a simple question about the topic)";
+const TALK_SECONDS = 5 * 60;
+let talkBusy = false;
+let talkTimer = null;
+let talkLeft = TALK_SECONDS;
+let finishWhenIdle = false;
+let talkFails = 0;
+
+const talkLog = () => store.get(`talkLog:${today}`, []);
+
+function renderChat() {
+  $("chat").replaceChildren(...talkLog().filter(m => m.content !== OPENER).flatMap(m => {
+    const nodes = [el("div", { className: `msg ${m.role}`, textContent: m.content })];
+    const c = m.correction;
+    if (c) nodes.push(el("div", { className: "fix" }, el("s", { textContent: c.wrong }), " → ", el("strong", { textContent: c.right }), el("div", { className: "muted", textContent: c.why })));
+    return nodes;
+  }));
+  $("chat").lastElementChild?.scrollIntoView({ block: "end" });
+}
+
+function setTalkBusy(busy) {
+  talkBusy = busy;
+  for (const id of ["talk-speak", "talk-send", "talk-input"]) $(id).disabled = busy;
+  if (!busy && finishWhenIdle) finishTalk();
+}
+
+// Sends one learner turn; correction cards are kept on the assistant entry for display.
+async function sendTurn(said) {
+  setTalkBusy(true);
+  status("talk-status", "…");
+  try {
+    const log = talkLog();
+    const { reply, correction } = await chatTurn({
+      apiKey: store.get("apiKey", ""),
+      topic: lesson.topic,
+      history: log.map(({ role, content }) => ({ role, content })),
+      said,
+    });
+    store.set(`talkLog:${today}`, [...log, { role: "user", content: said }, { role: "assistant", content: reply, correction }]);
+    if (correction) store.set("mistakes", addMistakes(store.get("mistakes", []), [{ date: today, ...correction }]));
+    status("talk-status", "");
+    renderChat();
+    say(reply);
+  } catch (e) {
+    if (e instanceof TutorError && e.kind === "auth") return openSettings(errorText(e));
+    status("talk-status", errorText(e), true);
+  } finally {
+    setTalkBusy(false);
+  }
+}
+
+function tick() {
+  talkLeft = Math.max(0, talkLeft - 1);
+  $("talk-timer").textContent = `${Math.floor(talkLeft / 60)}:${String(talkLeft % 60).padStart(2, "0")}`;
+  if (talkLeft === 0) {
+    clearInterval(talkTimer);
+    finishWhenIdle = true;
+    if (!talkBusy) finishTalk();
+  }
+}
+
+async function enterTalk() {
+  show("talk");
+  talkLeft = TALK_SECONDS;
+  finishWhenIdle = false;
+  $("talk-timer").textContent = "5:00";
+  $("talk-speak").hidden = !canListen();
+  renderChat();
+  if (!talkLog().length) await sendTurn(OPENER);
+  clearInterval(talkTimer);
+  talkTimer = setInterval(tick, 1000);
+}
+
+function finishTalk() {
+  clearInterval(talkTimer);
+  finishWhenIdle = false;
+  show("review");
+}
+
+$("talk-speak").onclick = async () => {
+  setTalkBusy(true);
+  status("talk-status", "Listening…");
+  try {
+    const said = await listen();
+    talkFails = 0;
+    setTalkBusy(false);
+    await sendTurn(said);
+  } catch (e) {
+    talkFails++;
+    setTalkBusy(false);
+    status("talk-status", talkFails >= 2 ? "Having trouble hearing you — type your answer below." : "I didn't hear anything — try again.", true);
+  }
+};
+
+$("talk-send").onclick = () => {
+  const said = $("talk-input").value.trim();
+  if (!said) return status("talk-status", "I didn't hear anything — try again.", true);
+  $("talk-input").value = "";
+  sendTurn(said);
+};
+
+$("talk-input").onkeydown = e => { if (e.key === "Enter") $("talk-send").click(); };
+$("talk-finish").onclick = () => (talkBusy ? (finishWhenIdle = true) : finishTalk());
 
 renderHome();

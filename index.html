@@ -51,6 +51,12 @@
   .status.error { color: var(--bad); }
   .score { font-size: 1.6rem; font-weight: 700; }
   .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .msg { padding: 10px 14px; border-radius: 14px; margin: 8px 0; max-width: 85%; }
+  .msg.assistant { background: var(--card); border: 1px solid var(--line); }
+  .msg.user { background: var(--accent); color: var(--accent-text); margin-left: auto; }
+  .fix { border-left: 4px solid var(--bad); background: var(--card); padding: 8px 12px; margin: 4px 0 12px; border-radius: 8px; font-size: 0.95rem; }
+  .fix s { color: var(--bad); }
+  .fix strong { color: var(--ok); }
 </style>
 </head>
 <body>
@@ -122,8 +128,14 @@
   </section>
 
   <section id="talk" hidden>
-    <div class="top"><h2>Talk</h2><button data-go="home">✕</button></div>
-    <p class="muted">Coming next.</p>
+    <div class="top"><h2>Talk <span class="muted" id="talk-timer">5:00</span></h2><button id="talk-finish">Finish →</button></div>
+    <div id="chat"></div>
+    <p class="status" id="talk-status" role="status"></p>
+    <button class="primary big" id="talk-speak">🎤 Tap to speak</button>
+    <div class="row" style="margin-top: 8px">
+      <input id="talk-input" autocomplete="off" placeholder="…or type your answer" style="flex: 1">
+      <button id="talk-send">Send</button>
+    </div>
   </section>
 
   <section id="review" hidden>
